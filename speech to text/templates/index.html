@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Voice Control</title>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</head>
+<body>
+    <h1>Control Robot Hand Gesture</h1>
+    <button onclick="startRecording()">Start Recording</button>
+    <button onclick="stopRecording()">Stop Recording</button>
+    <p id="result"></p>
+    <h2>Command History</h2>
+    <ul id="history"></ul>
+</body>
+</html>

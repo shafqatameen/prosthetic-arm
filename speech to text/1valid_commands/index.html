@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice-Controlled Robotic Hand</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        button { padding: 10px 20px; font-size: 18px; cursor: pointer; }
+        #output { margin-top: 20px; font-size: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Voice-Controlled Robotic Hand</h1>
+    <button onclick="recordAudio()">🎙 Record Command</button>
+    <p id="output">Waiting for input...</p>
+
+    <script>
+        function recordAudio() {
+            const constraints = { audio: true };
+            navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+                const mediaRecorder = new MediaRecorder(stream);
+                const chunks = [];
+                
+                mediaRecorder.ondataavailable = event => {
+                    chunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(chunks, { type: "audio/wav" });
+                    sendAudio(audioBlob);
+                };
+
+                mediaRecorder.start();
+                setTimeout(() => mediaRecorder.stop(), 3000); // Record for 3 seconds
+            });
+        }
+
+        function sendAudio(audioBlob) {
+            const formData = new FormData();
+            formData.append("audio", audioBlob, "command.wav");
+
+            fetch("/process_audio", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById("output").innerText = "Error: " + data.error;
+                } else {
+                    document.getElementById("output").innerText = "Command: " + data.commands.join(", ");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+</body>
+</html>
